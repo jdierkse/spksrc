@@ -4,6 +4,7 @@ SPK_REV = 1
 SPK_ICON = src/syncserver.png
 DSM_UI_DIR = app
 
+BUILD_DEPENDS = cross/python cross/setuptools cross/pip cross/wheel cross/scrypt
 DEPENDS  = cross/busybox
 WHEELS = src/requirements.txt
 SPK_DEPENDS = "python>=2.7.6-8"
@@ -15,7 +16,7 @@ BETA = 1
 
 HOMEPAGE   = https://wiki.mozilla.org/Services/Sync/Server
 LICENSE    = MPL/GPL/LGPL
-HELPURL    = http://www.synocommunity.com/help/syncserver
+HELPURL    = http://synocommunity.com/help/syncserver
 
 WIZARDS_DIR = src/wizard/
 
@@ -42,7 +43,7 @@ syncserver_extra_install:
 	install -m 755 src/syncserver.conf $(STAGING_DIR)/var/
 	install -m 755 src/syncserver.ini $(STAGING_DIR)/var/
 	install -m 755 -d $(STAGING_DIR)/app/images
-	for size in 16 24 32 48; do \
+	for size in 16 24 32 48 72; do \
 		convert $(SPK_ICON) -thumbnail $${size}x$${size} \
 			$(STAGING_DIR)/app/images/$(SPK_NAME)-$${size}.png ; \
 	done

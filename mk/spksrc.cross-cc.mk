@@ -14,8 +14,31 @@ endif
 DIST_EXT      = $(PKG_EXT)
 
 ifneq ($(ARCH),)
-ARCH_SUFFIX = -$(ARCH)
+ARCH_SUFFIX = -$(ARCH)-$(TCVERSION)
 TC = syno$(ARCH_SUFFIX)
+endif
+
+
+#####
+
+ifneq ($(REQ_KERNEL),)
+  ifeq ($(ARCH),x64)
+    @$(error x64 arch cannot be used when REQ_KERNEL is set )
+  endif
+endif
+
+# Check if package supports ARCH
+ifneq ($(UNSUPPORTED_ARCHS),)
+  ifneq (,$(findstring $(ARCH),$(UNSUPPORTED_ARCHS)))
+    @$(error Arch '$(ARCH)' is not a supported architecture )
+  endif
+endif
+
+# Check minimum DSM requirements of package
+ifneq ($(REQUIRED_DSM),)
+  ifneq ($(REQUIRED_DSM),$(firstword $(sort $(TCVERSION) $(REQUIRED_DSM))))
+    @$(error Toolchain $(TCVERSION) is lower than required version in Makefile $(REQUIRED_DSM) )
+  endif
 endif
 
 #####
@@ -65,11 +88,8 @@ smart-clean:
 clean:
 	rm -fr work work-*
 
+
 all: install
-
-
-SUPPORTED_TCS = $(notdir $(wildcard ../../toolchains/syno-*))
-SUPPORTED_ARCHS = $(notdir $(subst -,/,$(SUPPORTED_TCS)))
 
 .PHONY: $(DIGESTS_FILE)
 $(DIGESTS_FILE):
@@ -96,8 +116,22 @@ dependency-tree:
 	done
 
 .PHONY: all-archs
-all-archs: $(addprefix arch-,$(SUPPORTED_ARCHS))
+all-archs: $(addprefix arch-,$(AVAILABLE_ARCHS))
 
 arch-%:
-	@$(MSG) Building package for arch $(subst arch-,,$@)
-	-@MAKEFLAGS= $(MAKE) ARCH=$(subst arch-,,$@)
+	@$(MSG) Building package for arch $*
+	-@MAKEFLAGS= $(MAKE) ARCH=$(basename $(subst -,.,$(basename $(subst .,,$*)))) TCVERSION=$(if $(findstring $*,$(basename $(subst -,.,$(basename $(subst .,,$*))))),$(DEFAULT_TC),$(notdir $(subst -,/,$*)))
+
+.PHONY: kernel-required
+kernel-required:
+	@if [ -n "$(REQ_KERNEL)" ]; then \
+	  exit 1 ; \
+	fi
+	@for depend in $(DEPENDS) ; do \
+	  if $(MAKE) --no-print-directory -C ../../$$depend kernel-required >/dev/null 2>&1 ; then \
+	    exit 0 ; \
+	  else \
+	    exit 1 ; \
+	  fi ; \
+	done
+

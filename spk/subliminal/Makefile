@@ -1,22 +1,24 @@
 SPK_NAME = subliminal
-SPK_VERS = 0.6.4
-SPK_REV = 10
+SPK_VERS = 0.7.5
+SPK_REV = 12
 SPK_ICON = src/subliminal.png
 DSM_UI_DIR = app
 
-DEPENDS =
-SPK_DEPENDS = "python>2.7.3-3"
+BETA = 1
+
+WHEELS = src/requirements.txt
+SPK_DEPENDS = "python>=2.7.6-8"
 
 MAINTAINER = SynoCommunity
 DESCRIPTION = Subliminal allows you automatically download best-matching subtitles for your movies and tv shows on your DiskStation. This package is named after Subliminal, the Python library used to search and download subtitles.
 DESCRIPTION_FRE = Subliminal vous permet de télécharger automatiquement les meilleurs sous-titres pour vos films et séries sur votre DiskStation. Ce paquet est nommé d\\\'après Subliminal, la librairie Python utilisée pour rechercher et télécharger les sous-titres.
 RELOAD_UI = yes
 DISPLAY_NAME = Subliminal
-CHANGELOG = "1. DSM 5.0 compatibility"
+CHANGELOG = "Update to Subliminal 0.7.5"
 
 HOMEPAGE   = https://github.com/Diaoul/subliminal
 LICENSE    = LGPL
-HELPURL    = http://www.synocommunity.com/help/subliminal
+HELPURL    = http://synocommunity.com/help/subliminal
 
 INSTALLER_SCRIPT = src/installer.sh
 SSS_SCRIPT       = src/dsm-control.sh
@@ -32,7 +34,9 @@ override ARCH=
 include ../../mk/spksrc.spk.mk
 
 .PHONY: subliminal_extra_install
-subliminal_extra_install: $(STAGING_DIR)/share/requirements.pybundle
+subliminal_extra_install:
+	install -m 755 -d ${STAGING_DIR}/share/wheelhouse
+	install -m 644 ${WORK_DIR}/wheelhouse/* ${STAGING_DIR}/share/wheelhouse/
 	install -m 755 -d $(STAGING_DIR)/var
 	install -m 755 -d $(STAGING_DIR)/app
 	install -m 755 -d $(STAGING_DIR)/cache
@@ -54,12 +58,7 @@ subliminal_extra_install: $(STAGING_DIR)/share/requirements.pybundle
 	install -m 644 src/app/images/*.png $(STAGING_DIR)/app/images/
 	install -m 755 -d $(STAGING_DIR)/app/images/superboxselect
 	install -m 644 src/app/images/superboxselect/*.png $(STAGING_DIR)/app/images/superboxselect/
-	for size in 16 24 32 48; do \
+	for size in 16 24 32 48 72; do \
 		convert $(SPK_ICON) -thumbnail $${size}x$${size} \
 		        $(STAGING_DIR)/app/images/$(SPK_NAME)-$${size}.png ; \
 	done
-
-$(STAGING_DIR)/share/requirements.pybundle:
-	@$(MSG) "Bundling requirements"
-	install -m 755 -d $(STAGING_DIR)/share
-	@cd $(WORK_DIR) && $(PIP) bundle --no-use-wheel $@ subliminal==$(SPK_VERS) pyextdirect==0.3.1 configobj flask

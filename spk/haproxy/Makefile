@@ -1,10 +1,11 @@
 SPK_NAME = haproxy
-SPK_VERS = 1.5~dev21
-SPK_REV = 12
+SPK_VERS = 1.5.11
+SPK_REV = 17
 SPK_ICON = src/haproxy.png
 DSM_UI_DIR = app
 
 DEPENDS = cross/$(SPK_NAME)
+WHEELS = pyextdirect==0.3.1 flask Werkzeug Jinja2 itsdangerous
 SPK_DEPENDS = "python>2.7.3-3"
 
 MAINTAINER = SynoCommunity
@@ -13,15 +14,17 @@ DESCRIPTION_FRE = HAProxy est un produit libre, performant et fiable qui permet 
 ADMIN_PORT = 8280
 RELOAD_UI = yes
 DISPLAY_NAME = HAProxy
+CHANGELOG = "1. Update to 1.5.11"
 
 HOMEPAGE   = http://haproxy.1wt.eu/
 LICENSE    = GNU GPL 2
-HELPURL    = http://www.synocommunity.com/help/haproxy
+HELPURL    = http://synocommunity.com/help/haproxy
 
 WIZARDS_DIR = src/wizard/
 
 INSTALLER_SCRIPT = src/installer.sh
 SSS_SCRIPT       = src/dsm-control.sh
+FWPORTS          = src/${SPK_NAME}.sc
 
 INSTALL_PREFIX = /usr/local/$(SPK_NAME)
 
@@ -30,7 +33,9 @@ POST_STRIP_TARGET = haproxy_extra_install
 include ../../mk/spksrc.spk.mk
 
 .PHONY: haproxy_extra_install
-haproxy_extra_install: $(STAGING_DIR)/share/requirements.pybundle
+haproxy_extra_install:
+	install -m 755 -d ${STAGING_DIR}/share/wheelhouse
+	install -m 644 ${WORK_DIR}/wheelhouse/* ${STAGING_DIR}/share/wheelhouse/
 	install -m 755 -d $(STAGING_DIR)/var
 	install -m 755 -d $(STAGING_DIR)/var/crt
 	install -m 755 -d $(STAGING_DIR)/app
@@ -49,12 +54,7 @@ haproxy_extra_install: $(STAGING_DIR)/share/requirements.pybundle
 	done
 	install -m 755 -d $(STAGING_DIR)/app/images
 	install -m 644 src/app/images/*.png $(STAGING_DIR)/app/images/
-	for size in 16 24 32 48; do \
+	for size in 16 24 32 48 72; do \
 		convert $(SPK_ICON) -thumbnail $${size}x$${size} \
 		        $(STAGING_DIR)/app/images/$(SPK_NAME)-$${size}.png ; \
 	done
-
-$(STAGING_DIR)/share/requirements.pybundle:
-	@$(MSG) "Bundling requirements"
-	install -m 755 -d $(STAGING_DIR)/share
-	@cd $(WORK_DIR) && $(PIP) bundle $@ pyextdirect==0.3.1 flask

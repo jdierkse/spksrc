@@ -1,6 +1,6 @@
 SPK_NAME = nzbget-testing
-SPK_VERS = 13.0~r963
-SPK_REV = 4
+SPK_VERS = 15.0~r1286
+SPK_REV = 8
 SPK_ICON = src/nzbget-testing.png
 DSM_UI_DIR = app
 
@@ -13,16 +13,17 @@ DESCRIPTION_SPN = NZBGet es una aplicación de linea de comandos escrita en C++ 
 RELOAD_UI = yes
 ADMIN_PORT = 9876
 DISPLAY_NAME = NZBGet Testing
-CHANGELOG = "1. DSM 5.0 compatibility"
+CHANGELOG = "1. Update to 15.0~r1286<br>2. Add \"sc-download\" group to set permissions via DSM"
 BETA = 1
 
-HOMEPAGE = http://nzbget.sourceforge.net/
+HOMEPAGE = http://nzbget.net
 LICENSE  =
 
 WIZARDS_DIR = src/wizard/
 
 INSTALLER_SCRIPT = src/installer.sh
 SSS_SCRIPT       = src/dsm-control.sh
+FWPORTS          = src/${SPK_NAME}.sc
 
 INSTALL_PREFIX = /usr/local/$(SPK_NAME)
 
@@ -34,7 +35,7 @@ ENV += BUSYBOX_CONFIG="$(BUSYBOX_CONFIG)"
 include ../../mk/spksrc.spk.mk
 
 .PHONY: nzbget_extra_install
-nzbget_extra_install: $(STAGING_DIR)/share/nzbget/ppscripts/nzbToMedia
+nzbget_extra_install: $(STAGING_DIR)/share/nzbget/scripts/nzbToMedia $(STAGING_DIR)/share/nzbget/scripts/GetScripts
 	install -m 755 -d $(STAGING_DIR)/var
 	install -m 644 src/nzbget.conf $(STAGING_DIR)/var/nzbget.conf
 	install -m 644 src/nzbget.conf.template $(STAGING_DIR)/share/nzbget/nzbget.conf
@@ -42,11 +43,13 @@ nzbget_extra_install: $(STAGING_DIR)/share/nzbget/ppscripts/nzbToMedia
 	install -m 644 src/app/config $(STAGING_DIR)/app/config
 	install -m 755 -d $(STAGING_DIR)/app/texts
 	install -m 755 -d $(STAGING_DIR)/app/images
-	for size in 16 24 32 48; do \
+	for size in 16 24 32 48 72; do \
 		convert $(SPK_ICON) -thumbnail $${size}x$${size} \
 		        $(STAGING_DIR)/app/images/$(SPK_NAME)-$${size}.png ; \
 	done
 
-$(STAGING_DIR)/share/nzbget/ppscripts/nzbToMedia:
-	cd $(STAGING_DIR)/share/nzbget/ppscripts && git clone https://github.com/clinton-hall/nzbToMedia.git
-	rm -fr $(STAGING_DIR)/share/nzbget/ppscripts/nzbToMedia/.git*
+$(STAGING_DIR)/share/nzbget/scripts/nzbToMedia:
+	cd $(STAGING_DIR)/share/nzbget/scripts && git clone https://github.com/clinton-hall/nzbToMedia.git
+
+$(STAGING_DIR)/share/nzbget/scripts/GetScripts:
+	cd $(STAGING_DIR)/share/nzbget/scripts && git clone https://github.com/clinton-hall/GetScripts.git

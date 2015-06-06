@@ -6,7 +6,7 @@ DSM_UI_DIR = app
 BETA = 1
 
 DEPENDS  = cross/$(SPK_NAME)
-
+WHEELS = Mako chardet pyxdg
 SPK_DEPENDS = "python>2.7.3-3"
 
 MAINTAINER = SynoCommunity
@@ -20,6 +20,7 @@ LICENSE    = GPL
 
 INSTALLER_SCRIPT = src/installer.sh
 SSS_SCRIPT       = src/dsm-control.sh
+FWPORTS          = src/${SPK_NAME}.sc
 
 INSTALL_PREFIX = /usr/local/$(SPK_NAME)
 
@@ -31,19 +32,16 @@ override ARCH=
 include ../../mk/spksrc.spk.mk
 
 .PHONY: deluge_extra_install
-deluge_extra_install: $(STAGING_DIR)/share/requirements.pybundle
+deluge_extra_install:
 	install -m 755 -d $(STAGING_DIR)/var
 	install -m 644 src/config.yml $(STAGING_DIR)/var/config.yml
+	install -m 755 -d ${STAGING_DIR}/share/wheelhouse
+	install -m 644 ${WORK_DIR}/wheelhouse/* ${STAGING_DIR}/share/wheelhouse/
 	install -m 755 -d $(STAGING_DIR)/app
 	install -m 644 src/app/config $(STAGING_DIR)/app/config
 	install -m 755 src/app/deluge.cgi.py $(STAGING_DIR)/app/deluge.cgi
 	install -m 755 -d $(STAGING_DIR)/app/images
-	for size in 16 24 32 48; do \
+	for size in 16 24 32 48 72; do \
 		convert $(SPK_ICON) -thumbnail $${size}x$${size} \
 		        $(STAGING_DIR)/app/images/$(SPK_NAME)-$${size}.png ; \
 	done
-
-$(STAGING_DIR)/share/requirements.pybundle:
-	@$(MSG) "Bundling requirements"
-	install -m 755 -d $(STAGING_DIR)/share
-	@cd $(WORK_DIR) && $(PIP) bundle --no-dependencies $@ Mako chardet pyxdg

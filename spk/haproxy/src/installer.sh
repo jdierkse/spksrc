@@ -8,12 +8,15 @@ DNAME="HAProxy"
 INSTALL_DIR="/usr/local/${PACKAGE}"
 SSS="/var/packages/${PACKAGE}/scripts/start-stop-status"
 PYTHON_DIR="/usr/local/python"
-PATH="${INSTALL_DIR}/bin:${INSTALL_DIR}/env/bin:${PYTHON_DIR}/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/syno/sbin:/usr/syno/bin"
+PATH="${INSTALL_DIR}/bin:${INSTALL_DIR}/env/bin:${PYTHON_DIR}/bin:${PATH}"
 USER="haproxy"
 GROUP="nobody"
 VIRTUALENV="${PYTHON_DIR}/bin/virtualenv"
 TMP_DIR="${SYNOPKG_PKGDEST}/../../@tmp"
+CFG_FILE="${INSTALL_DIR}/var/haproxy.cfg"
 
+SERVICETOOL="/usr/syno/bin/servicetool"
+FWPORTS="/var/packages/${PACKAGE}/scripts/${PACKAGE}.sc"
 
 preinst ()
 {
@@ -35,14 +38,17 @@ postinst ()
     # Create a Python virtualenv
     ${VIRTUALENV} --system-site-packages ${INSTALL_DIR}/env > /dev/null
 
-    # Install the bundle
-    ${INSTALL_DIR}/env/bin/pip install --no-index -U ${INSTALL_DIR}/share/requirements.pybundle > /dev/null
+    # Install the wheels/requirements
+    ${INSTALL_DIR}/env/bin/pip install --use-wheel --no-deps --no-index -U --force-reinstall -f ${INSTALL_DIR}/share/wheelhouse -r ${INSTALL_DIR}/share/wheelhouse/requirements.txt > /dev/null 2>&1
 
     # Setup the database
     ${INSTALL_DIR}/env/bin/python ${INSTALL_DIR}/app/setup.py
 
     # Correct the files ownership
     chown -R ${USER}:root ${SYNOPKG_PKGDEST}
+
+    # Add firewall config
+    ${SERVICETOOL} --install-configure-file --package ${FWPORTS} >> /dev/null
 
     exit 0
 }
@@ -56,6 +62,11 @@ preuninst ()
     if [ "${SYNOPKG_PKG_STATUS}" != "UPGRADE" ]; then
         delgroup ${USER} ${GROUP}
         deluser ${USER}
+    fi
+
+    # Remove firewall config
+    if [ "${SYNOPKG_PKG_STATUS}" == "UNINSTALL" ]; then
+        ${SERVICETOOL} --remove-configure-file --package ${PACKAGE}.sc >> /dev/null
     fi
 
     exit 0
@@ -73,6 +84,16 @@ preupgrade ()
 {
     # Stop the package
     ${SSS} stop > /dev/null
+
+    # Revision 12 introduces backward incompatible changes
+    if [ `echo ${SYNOPKG_OLD_PKGVER} | sed -r "s/^.*-([0-9]+)$/\1/"` -le 12 ]; then
+        ${INSTALL_DIR}/env/bin/python ${SYNOPKG_PKGINST_TEMP_DIR}/app/application/db_upgrade_12.py
+    fi
+
+    # Revision 16 adds security updates
+    if [ `echo ${SYNOPKG_OLD_PKGVER} | sed -r "s/^.*-([0-9]+)$/\1/"` -le 16 ]; then
+        ${INSTALL_DIR}/env/bin/python ${SYNOPKG_PKGINST_TEMP_DIR}/app/application/db_upgrade_16.py
+    fi
 
     # Save some stuff
     rm -fr ${TMP_DIR}/${PACKAGE}

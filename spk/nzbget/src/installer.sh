@@ -13,9 +13,45 @@ GROUP="users"
 CFG_FILE="${INSTALL_DIR}/var/nzbget.conf"
 TMP_DIR="${SYNOPKG_PKGDEST}/../../@tmp"
 
+SERVICETOOL="/usr/syno/bin/servicetool"
+FWPORTS="/var/packages/${PACKAGE}/scripts/${PACKAGE}.sc"
+
+SYNO_GROUP="sc-download"
+SYNO_GROUP_DESC="SynoCommunity's download related group"
+
+syno_group_create ()
+{
+    # Create syno group (Does nothing when group already exists)
+    synogroup --add ${SYNO_GROUP} ${USER} > /dev/null
+    # Set description of the syno group
+    synogroup --descset ${SYNO_GROUP} "${SYNO_GROUP_DESC}"
+
+    # Add user to syno group (Does nothing when user already in the group)
+    addgroup ${USER} ${SYNO_GROUP}
+}
+
+syno_group_remove ()
+{
+    # Remove user from syno group
+    delgroup ${USER} ${SYNO_GROUP}
+
+    # Check if syno group is empty
+    if ! synogroup --get ${SYNO_GROUP} | grep -q "0:"; then
+        # Remove syno group
+        synogroup --del ${SYNO_GROUP} > /dev/null
+    fi
+}
 
 preinst ()
 {
+    # Check directory
+    if [ "${SYNOPKG_PKG_STATUS}" == "INSTALL" ]; then
+        if [ ! -d ${wizard_download_dir:=/volume1/downloads} ]; then
+            echo "Download directory ${wizard_download_dir} does not exist."
+            exit 1
+        fi
+    fi
+
     exit 0
 }
 
@@ -43,8 +79,13 @@ postinst ()
         fi
     fi
 
+    syno_group_create
+
     # Correct the files ownership
     chown -R ${USER}:root ${SYNOPKG_PKGDEST}
+
+    # Add firewall config
+    ${SERVICETOOL} --install-configure-file --package ${FWPORTS} >> /dev/null
 
     exit 0
 }
@@ -56,8 +97,15 @@ preuninst ()
 
     # Remove the user (if not upgrading)
     if [ "${SYNOPKG_PKG_STATUS}" != "UPGRADE" ]; then
+        syno_group_remove
+
         delgroup ${USER} ${GROUP}
         deluser ${USER}
+    fi
+
+    # Remove firewall config
+    if [ "${SYNOPKG_PKG_STATUS}" == "UNINSTALL" ]; then
+        ${SERVICETOOL} --remove-configure-file --package ${PACKAGE}.sc >> /dev/null
     fi
 
     exit 0

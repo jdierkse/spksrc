@@ -96,6 +96,30 @@ download_target: $(PRE_DOWNLOAD_TARGET)
 	        ln -s $${localFile} $${localHead} ; \
 	      fi ; \
 	      ;; \
+	    hg) \
+	      if [ "$(PKG_HG_REV)" = "tip" ]; then \
+	        rev=`hg identify -r "tip" $${url}` ; \
+	      else \
+	        rev=$(PKG_HG_REV) ; \
+	      fi ; \
+	      localFolder=$(NAME)-r$${rev} ; \
+	      localFile=$${localFolder}.tar.gz ; \
+	      localTip=$(NAME)-rtip.tar.gz ; \
+	      if [ ! -f $${localFile} ]; then \
+	        rm -fr $${localFolder}.part ; \
+	        echo "hg clone -r $${rev} $${url}" ; \
+	        hg clone -r $${rev} $${url} $${localFolder}.part ; \
+	        mv $${localFolder}.part $${localFolder} ; \
+	        tar --exclude-vcs -czf $${localFile} $${localFolder} ; \
+	        rm -fr $${localFolder} ; \
+	      else \
+	        $(MSG) "  File $${localFile} already downloaded" ; \
+	      fi ; \
+	      if [ "$(PKG_HG_REV)" = "tip" ]; then \
+	        rm -f $${localTip} ; \
+	        ln -s $${localFile} $${localTip} ; \
+	      fi ; \
+	      ;; \
 	    *) \
 	      localFile=$(PKG_DIST_FILE) ; \
 	      if [ -z "$${localFile}" ]; then \
@@ -105,7 +129,7 @@ download_target: $(PRE_DOWNLOAD_TARGET)
 	        rm -f $${localFile}.part ; \
 	        url=`echo $${url} | sed -e '#^\(http://sourceforge\.net/.*\)$#\1?use_mirror=autoselect#'` ; \
 	        echo "wget $${url}" ; \
-	        wget -nv -O $${localFile}.part $${url} ; \
+	        wget $(DOWNLOAD_ARGS) -nv -O $${localFile}.part $${url} ; \
 	        mv $${localFile}.part $${localFile} ; \
 	      else \
 	        $(MSG) "  File $${localFile} already downloaded" ; \

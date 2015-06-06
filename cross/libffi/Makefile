@@ -1,5 +1,5 @@
 PKG_NAME = libffi
-PKG_VERS = 3.0.11
+PKG_VERS = 3.2.1
 PKG_EXT = tar.gz
 PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
@@ -19,10 +19,11 @@ include ../../mk/spksrc.cross-cc.mk
 
 .PHONY: myPreConfigure
 myPreConfigure:
+	$(RUN) autoconf
 	$(RUN) aclocal
 	$(RUN) automake
 
 .PHONY: myInstall
 myInstall:
-	$(RUN) make install DESTDIR=$(INSTALL_DIR) prefix=$(STAGING_INSTALL_PREFIX)
+	$(RUN) $(MAKE) install DESTDIR=$(INSTALL_DIR)
 
