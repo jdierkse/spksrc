@@ -18,10 +18,6 @@ fi
 
 start_daemon ()
 {
-    if [ -e /var/packages/hdhomerun/scripts/start-stop-status ]; then
-        /var/packages/hdhomerun/scripts/start-stop-status start
-    fi
-
     ${TVHEADEND} -f -u ${USER} -c ${INSTALL_DIR}/var -p ${PID_FILE} -l ${LOG_FILE}
 }
 
@@ -36,9 +32,6 @@ stop_daemon ()
 stop_all ()
 {
     stop_daemon
-    if [ -e /var/packages/hdhomerun/scripts/start-stop-status ]; then
-        /var/packages/hdhomerun/scripts/start-stop-status stop
-    fi
 }
 
 daemon_status ()

@@ -16,7 +16,8 @@ COMPILE_TARGET = myCompile
 INSTALL_TARGET = myInstall
 
 # Build all if not told otherwise (will most likely fail)
-BOOST_LIBRARIES ?= all
+#BOOST_LIBRARIES ?= all
+BOOST_LIBRARIES ?= date_time filesystem program_options regex serialization system thread iostreams
 
 # Useful variables for subst
 comma:= ,

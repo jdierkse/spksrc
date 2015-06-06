@@ -26,7 +26,7 @@ postinst ()
     # Install busybox stuff
     ${INSTALL_DIR}/bin/busybox --install ${INSTALL_DIR}/bin
 
-    # Create user
+    NSTALL_DIR# Create user
     adduser -h ${INSTALL_DIR}/var -g "${DNAME} User" -G ${GROUP} -s /bin/sh -S -D ${USER}
 
     # Edit the configuration according to the wizard
@@ -65,6 +65,9 @@ preupgrade ()
 {
     # Stop the package
     ${SSS} stop > /dev/null
+
+    # Remove Existing logfile
+    rm -f ${INSTALL_DIR}/var/tvheadend.log
 
     # Save some stuff
     rm -fr ${TMP_DIR}/${PACKAGE}

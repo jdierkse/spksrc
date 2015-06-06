@@ -15,13 +15,13 @@ CONFIGURE_ARGS = --enable-gpl --enable-libx264 --enable-libmp3lame --enable-nonf
 
 ADDITIONAL_CFLAGS = -fPIC
 
-ifneq ($(filter $(ARCH), armadaxp armada370 evansport),)
+ifneq ($(filter $(ARCH), armadaxp armada370 armada375 evansport),)
 else
 	CONFIGURE_ARGS += --enable-libfaac
 	DEPENDS += cross/faac
 endif
 
-ifneq ($(filter $(ARCH), 88f5281 88f6281 armadaxp armada370),)
+ifneq ($(filter $(ARCH), 88f5281 88f6281 armadaxp armada370 armada375 comcerto2k),)
 	CONFIGURE_ARGS += --disable-asm --disable-yasm --disable-neon --arch=arm
 else
 	ifneq ($(filter $(ARCH), ppc853x ppc854x),)
