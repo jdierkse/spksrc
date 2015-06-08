@@ -13,10 +13,9 @@ diff -Naur configure.orig configure
  check_cc_snippet atomic64 '#include <stdint.h>
  uint64_t test(uint64_t *ptr){
  return __sync_fetch_and_add(ptr, 1);
-diff -Naur src/atomic.h.orig src/atomic.h
---- ./src/atomic.h.orig	2013-04-18 16:23:19.000000000 +0200
-+++ ./src/atomic.h	2013-04-25 20:04:20.788382225 +0200
-@@ -21,13 +21,31 @@
+--- ./src/atomic.h.orig	2014-11-12 13:26:55.000000000 +0100
++++ ./src/atomic.h	2014-11-12 21:33:11.000000000 +0100
+@@ -21,19 +21,46 @@
  static inline int
  atomic_add(volatile int *ptr, int incr)
  {
@@ -27,6 +26,21 @@ diff -Naur src/atomic.h.orig src/atomic.h
 +  pthread_mutex_lock(&atomic_lock);
 +  ret = *ptr;
 +  *ptr += incr;
++  pthread_mutex_unlock(&atomic_lock);
++  return ret;
++#endif
+ }
+ 
+ static inline int
+ atomic_dec(volatile int *ptr, int decr)
+ {
++#if ENABLE_ATOMIC32
+   return __sync_fetch_and_sub(ptr, decr);
++#else
++  int ret;
++  pthread_mutex_lock(&atomic_lock);
++  ret = *ptr;
++  *ptr -= decr;
 +  pthread_mutex_unlock(&atomic_lock);
 +  return ret;
 +#endif

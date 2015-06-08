@@ -1,5 +1,5 @@
 SPK_NAME = tvheadend-testing
-SPK_VERS = 4.1.163
+SPK_VERS = 4.1.168
 SPK_REV = 1
 SPK_ICON = src/tvheadend-testing.png
 DSM_UI_DIR = app
@@ -13,7 +13,7 @@ DESCRIPTION_FRE = Tvheadend est un serveur de streaming pour linux gérant les s
 ADMIN_PORT = 9981
 RELOAD_UI = yes
 DISPLAY_NAME = Tvheadend-Testing
-CHANGELOG = "Update to 4.1.163"
+CHANGELOG = "Update to 4.1.168"
 
 HOMEPAGE = https://www.lonelycoder.com/tvheadend/
 LICENSE  =

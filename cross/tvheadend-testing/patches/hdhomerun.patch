@@ -1,0 +1,12 @@
+--- ./Makefile.hdhomerun.orig	2014-12-06 01:31:30.000000000 +0100
++++ ./Makefile.hdhomerun	2014-12-06 01:31:24.000000000 +0100
+@@ -57,7 +57,9 @@
+ # libhdhomerun
+ #
+ 
++OCC := $(CC)
+ -include $(LIBHDHRDIR)/$(LIBHDHR)/Makefile
++CC  := $(OCC)
+ 
+ OBJS = $(foreach file,$(LIBSRCS),$(LIBHDHRDIR)/$(LIBHDHR)/$(basename $(file)).o)
+ 

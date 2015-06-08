@@ -1,11 +1,11 @@
---- support/version.org	2014-04-08 14:12:15.000000000 +0200
-+++ support/version	2014-04-08 14:12:26.000000000 +0200
-@@ -18,7 +18,7 @@
- elif [ -f "$(dirname "$0")/../debian/changelog" ]; then
-   VER=$(head -1 "$(dirname "$0")/../debian/changelog" | awk '{ print $2 }' | tr -d '()' | cut -d '-' -f 1)
- else
--  VER="0.0.0~unknown"
-+  VER="3.9.1987"
+--- support/version.org	2015-05-29 09:19:44.000000000 +0200
++++ support/version	2015-05-29 09:23:27.000000000 +0200
+@@ -23,7 +23,7 @@
+   VER=$(basename $(realpath $(dirname "$0")/..) | sed -e 's/^tvheadend-//' | sed -e 's/^tvheadend-v//')
+   case $VER in
+   [1-9]*\.[0-9]*) ;;
+-  *) VER="0.0.0~unknown" ;;
++  *) VER="4.1.168" ;;
+   esac
  fi
  
- # Output
